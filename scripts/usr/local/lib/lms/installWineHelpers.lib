@@ -1,0 +1,168 @@
+#!/bin/bash
+# =========================================================================
+# =========================================================================
+#
+#	installWineHelpers
+#	  Install system/application software.
+#
+# =========================================================================
+#
+# @author Jay Wheeler.
+# @version 0.0.1
+# @copyright © 2019. EarthWalk Software.
+# @license Licensed under the GNU General Public License, GPL-3.0-or-later.
+# @package ewsdocker/ldc-wine
+# @subpackage installWineHelpers
+#
+# =========================================================================
+#
+#	Copyright © 2019. EarthWalk Software
+#	Licensed under the GNU General Public License, GPL-3.0-or-later.
+#
+#   This file is part of ewsdocker/ldc-wine.
+#
+#   ewsdocker/ldc-wine is free software: you can redistribute 
+#   it and/or modify it under the terms of the GNU General Public License 
+#   as published by the Free Software Foundation, either version 3 of the 
+#   License, or (at your option) any later version.
+#
+#   ewsdocker/ldc-wine is distributed in the hope that it will 
+#   be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
+#   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with ewsdocker/ldc-wine.  If not, see 
+#   <http://www.gnu.org/licenses/>.
+#
+# =========================================================================
+# =========================================================================
+
+declare -i iwResult=0
+declare    iwMsg=""
+
+# ========================================================================
+#
+#   iwWinetricks
+#		Install Winetricks
+#
+#	Enter:
+#		none
+#	Exit:
+#		0 = no error
+#		non-zero = error number
+#
+# ========================================================================
+function iwWinetricks()
+{
+ 	echo "Downloading \"${WTRICKS_URL}\""
+ 
+ 	iwResult=0
+ 	while [ true ]
+ 	do
+		wget "${WTRICKS_URL}" 
+		[[ $? -eq 0 ]] || 
+		 {
+	 		echo "Unable to download \"${WTRICKS_URL}\"."
+	 		iwResult=1
+	 		break
+		 }
+
+ 		echo "Installing \"${WTRICKS_PKG}\""
+ 
+		dpkg  -i "${WTRICKS_PKG}" 
+		[[ $? -eq 0 ]] || 
+		 {
+	 		echo "Unable to install package \"${WTRICKS_PKG}\"."
+			iwResult=2
+	 		break
+		 }
+
+		echo "\"${WTRICKS_PKG}\" installed."
+		break
+
+	done
+
+	return ${iwResult}
+ }
+
+# ========================================================================
+#
+#	iwMono
+#   	Install Mono (to provide .NET functionality) for Wine
+#
+#	Exit:
+#		0 = no error
+#		non-zero = error number
+#
+# ========================================================================
+function iwMono()
+{
+ 	echo "Downloading \"${WMONO_URL}\""
+ 
+ 	iwResult=0
+ 	while [ true ]
+ 	do
+		iwMsg=$( wget "${WMONO_URL}" ) 
+		[[ $? -eq 0 ]] || 
+		 {
+	 		echo "    Unable to download \"${WMONO_URL}\"."
+			iwResult=1
+	 		break
+		 }
+
+ 		echo "Installing \"${WMONO_PKG}\""
+ 
+		iwMsg=$( wine64 msiexec /i ${WMONO_PKG} )
+		[[ $? -eq 0 ]] || 
+		 {
+	 		echo "    Unable to install package \"${WMONO_PKG}\"."
+			iwResult=2
+	 		break
+	 	 }
+
+		echo "\"${WMONO_URL}\" installed."
+		break
+
+	done
+
+	return ${iwResult}
+}
+
+# ========================================================================
+#
+#	iwInstallers
+#   	Install applications
+#
+#	Enter:
+#		none
+#	Exit:
+#		0 = no error
+#		non-zero = error number
+#
+# ========================================================================
+function iwInstallers()
+{
+	while [ true ]
+	do
+		[[ "${WMONO_INST}" == "1" ]] && 
+		 {
+			iwMono
+			[[ $? -eq 0 ]] || break
+		 }
+
+		[[ "${WTRICKS_INST}" == "1" ]] &&
+		 {
+		 	iwWinetricks
+			[[ $? -eq 0 ]] || break
+		 }
+
+		 break
+	done
+	
+	return $iwResult
+}
+
+# ========================================================================
+# ========================================================================
+

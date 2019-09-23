@@ -1,0 +1,321 @@
+# ========================================================================================
+# ========================================================================================
+#
+#    Dockerfile
+#      Dockerfile for ldc-wine:dwine.
+#
+# ========================================================================================
+#
+# @author Jay Wheeler.
+# @version 0.1.0
+# @copyright © 2019. EarthWalk Software.
+# @license Licensed under the GNU General Public License, GPL-3.0-or-later.
+# @package ldc-wine
+# @subpackage Dockerfile.dwine
+#
+# ========================================================================================
+#
+#	Copyright © 2019. EarthWalk Software
+#	Licensed under the GNU General Public License, GPL-3.0-or-later.
+#
+#   This file is part of ewsdocker/ldc-wine.
+#
+#   ewsdocker/ldc-wine is free software: you can redistribute 
+#   it and/or modify it under the terms of the GNU General Public License 
+#   as published by the Free Software Foundation, either version 3 of the 
+#   License, or (at your option) any later version.
+#
+#   ewsdocker/ldc-wine is distributed in the hope that it will 
+#   be useful, but WITHOUT ANY WARRANTY; without even the implied warranty 
+#   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with ewsdocker/ldc-wine.  If not, see 
+#   <http://www.gnu.org/licenses/>.
+#
+# ========================================================================================
+# ========================================================================================
+
+ARG FROM_REPO="ewsdocker" 
+ARG FROM_PARENT="ldc-lang" 
+ARG FROM_VERS="dgtk" 
+ARG FROM_EXT="-0.1.0" 
+ARG FROM_EXT_MOD="-gtk2"
+
+FROM ${FROM_REPO}/${FROM_PARENT}:${FROM_VERS}${FROM_EXT}${FROM_EXT_MOD}
+
+MAINTAINER Jay Wheeler <EarthWalkSoftware@gmail.com>
+
+ENV DEBIAN_FRONTEND noninteractive
+
+# ========================================================================================
+# ========================================================================================
+
+ARG FROM_REPO
+ARG FROM_PARENT
+ARG FROM_VERS
+ARG FROM_EXT
+ARG FROM_EXT_MOD
+
+# ========================================================================================
+
+ARG RUN_APP
+
+# ========================================================================================
+
+ARG LIB_NAME
+ARG LIB_VERSION
+ARG LIB_HOST
+ARG LIB_INSTALL
+
+# ========================================================================================
+
+ARG WINETRICKS_VERSION
+ARG WINETRICKS_HOST
+ARG WINETRICKS_NAME
+
+# ========================================================================================
+
+ARG MONO_VERSION
+ARG MONO_HOST
+ARG MONO_NAME
+
+# ========================================================================================
+
+ARG BUILD_REGISTRY
+ARG BUILD_REPO
+
+ARG BUILD_NAME 
+ARG BUILD_VERSION
+ARG BUILD_VERS_EXT
+ARG BUILD_EXT_MOD
+
+# ========================================================================================
+
+ARG BUILD_CATEGORIES
+ARG BUILD_TEMPLATE
+ARG BUILD_DAEMON
+
+# ========================================================================================
+
+ARG OPT_DEBUG
+ARG OPT_QUIET
+ARG OPT_TIMEOUT
+
+# ========================================================================================
+# ========================================================================================
+
+# ========================================================================================
+#
+#	Winetricks
+#
+# 		https://github.com/Winetricks/winetricks/releases/tag/20190912.tar.gz
+# 		http://deb.debian.org/debian/pool/contrib/w/winetricks/winetricks_0.0+20190912-1.debian.tar.xz
+#
+# 		http://ftp.us.debian.org/debian/pool/contrib/w/winetricks/winetricks_0.0+20190912-1_all.deb
+#
+# ========================================================================================
+
+ENV WTRICKS_INST=${WINETRICKS_INSTALL:-"1"} \
+    WTRICKS_VERS=${WINETRICKS_VERSION:-"0.0+20190912-1"} 
+
+ENV WTRICKS_HOST=${WINETRICKS_HOST:-"http://ftp.us.debian.org/debian/pool/contrib/w/winetricks"} \
+    WTRICKS_NAME=${WINETRICKS_NAME:-"winetricks_${WTRICKS_VERS}_all"} 
+
+ENV WTRICKS_PKG="${WTRICKS_NAME}.deb" 
+
+ENV WTRICKS_URL="${WTRICKS_HOST}/${WTRICKS_PKG}"
+
+# ========================================================================================
+#
+#	Mono
+#
+# 		http://dl.winehq.org/wine/wine-mono/4.9.2/wine-mono-4.9.2.msi
+#
+# ========================================================================================
+
+ENV WMONO_INST=${MONO_INSTALL:-"1"} \
+    WMONO_VERS=${MONO_VERSION:-"4.9.2"} 
+
+ENV WMONO_HOST=${MONO_HOST:-"http://dl.winehq.org/wine/wine-mono/${WMONO_VERS}"} \
+    WMONO_NAME=${MONO_NAME:-"wine-mono-${WMONO_VERS}"} 
+
+ENV WMONO_PKG=${WMONO_NAME}.msi 
+
+ENV WMONO_URL=${WMONO_HOST}/${WMONO_PKG}
+
+# ========================================================================================
+# ========================================================================================
+
+# ========================================================================================
+#
+# Set up universal environment interface
+#
+# ========================================================================================
+
+ENV \
+    LRUN_APP=${RUN_APP:-"/bin/bash"} \
+    \
+    LMS_DAEMON=${BUILD_DAEMON:-"0"} \
+    LMS_TEMPLATE=${BUILD_TEMPLATE:-"gui"} \
+    \
+    LMSOPT_TIMEOUT=${OPT_TIMEOUT:-"30"} \
+    LMSOPT_QUIET=${OPT_QUIET:-"0"} \
+    LMSOPT_DEBUG=${OPT_DEBUG:-"0"} \
+    \
+    LMS_BASE="/usr/local" \
+    LMS_HOME= \
+    LMS_CONF= \
+    \
+    LMS_CATEGORIES=${BUILD_CATEGORIES:-"Development"} \
+    LMS_DESKTOP=${BUILD_DESKTOP:-"Wine"} \
+    LMS_ICON=${BUILD_ICON:-"default.png"} \
+    \
+    LMS_FROM="${FROM_PARENT}:${FROM_VERS}${FROM_EXT}${FROM_EXT_MOD}" \
+    LMS_PARENT="${FROM_PARENT}:${FROM_VERS}${FROM_EXT}${FROM_EXT_MOD}" \
+    \
+    LMS_REGISTRY=${BUILD_REGISTRY} \
+    LMS_REPO=${BUILD_REPO:-"ewsdocker"} \
+ 	\
+    LMS_NAME=${BUILD_NAME:-"ldc-wine"} \
+    LMS_VERSION=${BUILD_VERSION:-"dwine"} \
+    LMS_VERS_X=${BUILD_VERS_EXT:-"-0.1.0"} \
+    \
+    LMS_VERS_MOD=${BUILD_EXT_MOD:-""} 
+
+ENV LMS_VERS_EXT="${LMS_VERS_X}${LMS_VERS_MOD}" \
+    LMS_PACKAGE="${LMS_PARENT}, ${LMS_DESKTOP} ${EC_RELEASE}-${EC_VERS}"
+
+ENV LMS_RUN_NAME="${LMS_NAME}-${LMS_VERSION}${LMS_VERS_EXT}" \
+    LMS_DOCKER_NAME="${LMS_NAME}:${LMS_VERSION}${LMS_VERS_EXT}"
+
+ENV LMS_DOCKER="${LMS_REPO}/${LMS_DOCKER_NAME}"
+
+# ========================================================================================
+#
+# https://github.com/ewsdocker/ldc-utilities/releases/download/ldc-utilities-0.1.5/ldc-library-0.1.5.tar.gz
+#
+# ========================================================================================
+
+ENV LMSLIB_INST=${LIB_INSTALL:-"0"} \
+    LMSLIB_VERS=${LIB_VERSION:-"0.1.5"} 
+
+ENV LMSLIB_HOST=${LIB_HOST:-"https://github.com/ewsdocker/ldc-utilities/releases/download/ldc-library-${LMSLIB_VERS}"} \
+    LMSLIB_NAME=${LIB_NAME:-"ldc-library"}
+
+ENV LMSLIB_PKG=${LMSLIB_NAME}-${LMSLIB_VERS}.tar.gz 
+
+ENV LMSLIB_URL=${LMSLIB_HOST}/${LMSLIB_PKG}
+
+# ========================================================================================
+
+ENV PATH=$PATH:/opt/wine-stable/bin
+
+# =========================================================================
+
+RUN \
+ # ========================================================================
+ #
+ #   set multi-architecture to support i386 architecture for Wine
+ #
+ # ========================================================================
+   dpkg --add-architecture i386 \
+ \
+ # ========================================================================
+ #
+ #   install APT wine repository
+ #
+ # ========================================================================
+ \  
+ && wget https://dl.winehq.org/wine-builds/winehq.key \
+ && apt-key add winehq.key \
+ && apt-add-repository https://dl.winehq.org/wine-builds/debian/ \
+ \
+ # ========================================================================
+ #
+ #   install wine
+ #
+ # ========================================================================
+ \  
+ && apt-get -y update \
+ && apt-get -y install --install-recommends \
+		winehq-stable \
+ \
+ # =========================================================================
+ #
+ #   Cleanup APT repository
+ #
+ # =========================================================================
+ \
+ && apt-get clean all \
+ \
+ # =========================================================================
+ #
+ #   download and install ldc-library
+ #
+ # =========================================================================
+ \
+ && if test "${LMSLIB_INST}" = "1"; then cd / ; wget "${LMSLIB_URL}"; tar -xvf "${LMSLIB_PKG}"; rm "${LMSLIB_PKG}"; fi 
+
+# ========================================================================================
+# ========================================================================================
+#
+#   install required scripts and localized ldc-library additions/modifications
+#
+# ========================================================================================
+# ========================================================================================
+
+COPY scripts/. /
+
+# ========================================================================================
+# ========================================================================================
+
+RUN \
+ # ========================================================================================
+ #
+ #	Finish setup of wine applications
+ #
+ # ========================================================================================
+ \
+    mkdir -p /usr/local/bin \
+ && mkdir -p /usr/bin/lms \
+ \
+ && ln -s /usr/bin/lms/iwStartWine.sh /usr/bin/iw-helpers \
+ \
+ && chmod +x /usr/local/bin/*.* \
+ && chmod +x /usr/local/bin/* \
+ && chmod +x /usr/bin/lms/*.* \
+ && chmod +x /usr/bin/lms/* \
+ && chmod +x /etc/lms/*.sh \
+ && chmod +x /my_init \
+ && chmod +x /my_service \
+ \
+ # ========================================================================
+ #
+ #   register the installed software
+ #
+ # ========================================================================
+ \
+ && printf "%s (%s), %s @ %s\n" ${LMS_DOCKER} ${LMS_PARENT} `date '+%Y-%m-%d'` `date '+%H:%M:%S'` >> /etc/ewsdocker-builds.txt \
+ \
+ # =========================================================================
+ #
+ #   Exit message on the display
+ #
+ # =========================================================================
+ && echo "" \
+ && echo "**************************************************" \
+ && echo "**************************************************" \
+ && echo "" \
+ && echo "Exiting: ${LMS_DESKTOP} - ${LMS_DOCKER}" \
+ && echo "From:     ${LMS_PACKAGE}" \
+ && echo "" \
+ && echo "**************************************************" \
+ && echo "**************************************************" \
+ && echo "" 
+
+# =========================================================================
+
+ENTRYPOINT [ "/etc/lms/entrypoint.sh" ]
+#CMD [ "wine" ]
