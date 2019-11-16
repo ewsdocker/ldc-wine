@@ -8,8 +8,8 @@ echo "   **** removing dwine container"
 echo "   ****"
 echo "   ********************************************"
 echo
-docker stop ldc-wine-dwine-0.1.0-helpers > /dev/null 2>&1
-docker rm ldc-wine-dwine-0.1.0-helpers > /dev/null 2>&1
+docker stop ldc-wine-dwine-helpers-0.1.0-b1 > /dev/null 2>&1
+docker rm ldc-wine-dwine-helpers-0.1.0-b1 > /dev/null 2>&1
 
 echo "   ********************************************"
 echo "   ****"
@@ -17,17 +17,17 @@ echo "   **** removing dwine image"
 echo "   ****"
 echo "   ********************************************"
 echo
-docker rmi ewsdocker/ldc-wine:dwine-0.1.0-helpers > /dev/null 2>&1
+docker rmi ewsdocker/ldc-wine:dwine-helpers-0.1.0-b1 > /dev/null 2>&1
 
 # ===========================================================================
 #
-#    ldc-wine:dwine-0.1.0-helpers
+#    ldc-wine:dwine-helpers-0.1.0-b1
 #
 # ===========================================================================
 
 echo "   ***************************************************"
 echo "   ****"
-echo "   **** building ewsdocker/ldc-wine:dwine-0.1.0-helpers image "
+echo "   **** building ewsdocker/ldc-wine:dwine-helpers-0.1.0-b1 image "
 echo "   ****"
 echo "   ***************************************************"
 echo
@@ -35,16 +35,19 @@ echo
 docker build \
   --build-arg RUN_APP="iw-helpers" \
   \
+  --build-arg BUILD_DAEMON="1" \
+  --build-arg BUILD_TEMPLATE="gui" \
+  \
   --build-arg BUILD_NAME="ldc-wine" \
-  --build-arg BUILD_VERSION="dwine" \
+  --build-arg BUILD_VERSION="dwine-helpers" \
   --build-arg BUILD_VERS_EXT="-0.1.0" \
-  --build-arg BUILD_EXT_MOD="-helpers" \
+  --build-arg BUILD_EXT_MOD="-b1" \
   \
   --build-arg FROM_REPO="ewsdocker" \
   --build-arg FROM_PARENT="ldc-wine" \
   --build-arg FROM_VERS="dwine" \
   --build-arg FROM_EXT="-0.1.0" \
-  --build-arg FROM_EXT_MOD="" \
+  --build-arg FROM_EXT_MOD="-b1" \
   \
   --build-arg WINETRICKS_HOST="http://alpine-nginx-pkgcache" \
   --build-arg WINETRICKS_VERSION="0.0+20190912-1" \
@@ -53,20 +56,23 @@ docker build \
   --build-arg MONO_VERSION="4.9.2" \
   \
   --build-arg LIB_INSTALL="0" \
-   \
-   --network=pkgnet \
+  --build-arg LIB_VERSION="0.1.6" \
+  --build-arg LIB_VERS_MOD="-b1" \
+  \
+  --build-arg LIB_HOST="http://alpine-nginx-pkgcache" \
+  --network=pkgnet \
   \
   --file Dockerfile.dwine-helpers \
-  -t ewsdocker/ldc-wine:dwine-0.1.0-helpers  .
+-t ewsdocker/ldc-wine:dwine-helpers-0.1.0-b1  .
 [[ $? -eq 0 ]] ||
  {
- 	echo "build ewsdocker/ldc-wine:dwine-0.1.0-helpers failed."
+ 	echo "build ewsdocker/ldc-wine:dwine-helpers-0.1.0-b1 failed."
  	exit 1
  }
 
 echo "   ***********************************************"
 echo "   ****"
-echo "   **** installing ldc-wine-dwine-0.1.0-helpers container"
+echo "   **** installing ldc-wine-dwine-helpers-0.1.0-b1 container"
 echo "   ****"
 echo "   ***********************************************"
 echo
@@ -82,9 +88,9 @@ docker run \
   -v ${HOME}/bin:/userbin \
   -v ${HOME}/.local:/usrlocal \
   -v ${HOME}/.config/docker:/conf \
-  -v ${HOME}/.config/docker/ldc-wine-dwine-0.1.0-helpers:/root \
-  -v ${HOME}/.config/docker/ldc-wine-dwine-0.1.0-helpers/workspace:/workspace \
-  -v ${HOME}/.config/docker/ldc-wine-dwine-0.1.0-helpers/workspace/opt:/opt \
+  -v ${HOME}/.config/docker/ldc-wine-dwine-helpers-0.1.0:/root \
+  -v ${HOME}/.config/docker/ldc-wine-dwine-helpers-0.1.0/workspace:/workspace \
+  -v ${HOME}/.config/docker/ldc-wine-dwine-helpers-0.1.0/workspace/opt:/opt \
   \
   -v ${HOME}/source:/repo \
   -v ${HOME}/Downloads:/Downloads \
@@ -95,14 +101,14 @@ docker run \
   -v /dev/shm:/dev/shm \
   --device /dev/snd \
   \
-   --network=pkgnet \
+  --network=pkgnet \
   \
   -it \
-  --name=ldc-wine-dwine-0.1.0-helpers \
-ewsdocker/ldc-wine:dwine-0.1.0-helpers
+  --name=ldc-wine-dwine-helpers-0.1.0-b1 \
+ewsdocker/ldc-wine:dwine-helpers-0.1.0-b1
 [[ $? -eq 0 ]] ||
  {
- 	echo "build container ldc-wine-dwine-0.1.0-helpers failed."
+ 	echo "build container ldc-wine-dwine-helpers-0.1.0-b1 failed."
  	exit 1
  }
 

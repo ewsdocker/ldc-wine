@@ -76,6 +76,14 @@ ARG MONO_NAME
 
 # ========================================================================================
 
+ARG LIB_HOST
+ARG LIB_NAME
+ARG LIB_VERSION
+ARG LIB_VERS_MOD
+ARG LIB_INSTALL
+
+# ========================================================================================
+
 ARG BUILD_REGISTRY
 ARG BUILD_REPO
 
@@ -172,10 +180,10 @@ ENV \
     LMS_REPO=${BUILD_REPO:-"ewsdocker"} \
  	\
     LMS_NAME=${BUILD_NAME:-"ldc-wine"} \
-    LMS_VERSION=${BUILD_VERSION:-"dwine"} \
+    LMS_VERSION=${BUILD_VERSION:-"dwine-helpers"} \
     LMS_VERS_X=${BUILD_VERS_EXT:-"-0.1.0"} \
     \
-    LMS_VERS_MOD=${BUILD_EXT_MOD:-"-helpers"} 
+    LMS_VERS_MOD=${BUILD_EXT_MOD:-""} 
 
 ENV LMS_VERS_EXT="${LMS_VERS_X}${LMS_VERS_MOD}" \
     LMS_PACKAGE="${LMS_PARENT}, ${LMS_DESKTOP} ${EC_RELEASE}-${EC_VERS}"
@@ -184,6 +192,28 @@ ENV LMS_RUN_NAME="${LMS_NAME}-${LMS_VERSION}${LMS_VERS_EXT}" \
     LMS_DOCKER_NAME="${LMS_NAME}:${LMS_VERSION}${LMS_VERS_EXT}"
 
 ENV LMS_DOCKER="${LMS_REPO}/${LMS_DOCKER_NAME}"
+
+# ========================================================================================
+# ========================================================================================
+#
+# https://github.com/ewsdocker/ldc-utilities/releases/download/ldc-utilities-0.1.6/ldc-library-0.1.6-b1.tar.gz
+#
+# ========================================================================================
+# ========================================================================================
+
+ENV LMSLIB_INST=${LIB_INSTALL:-"0"} \
+    LMSLIB_NAME=${LIB_NAME:-"ldc-library"} \
+    LMSLIB_VERS=${LIB_VERSION:-"0.1.6"} \
+    LMSLIB_VERS_MOD=${LIB_VERS_MOD:-""}
+
+ENV LMSLIB_HOST=${LIB_HOST:-"https://github.com/ewsdocker/ldc-utilities/releases/download/ldc-utilities-${LMSLIB_VERS}"}
+
+ENV LMSLIB_VERSION="${LMSLIB_VERS}${LMSLIB_VERS_MOD}"
+ENV LMSLIB_FULLNAME="${LMSLIB_NAME}-${LMSLIB_VERSION}"
+
+ENV LMSLIB_PKG=${LMSLIB_FULLNAME}.tar.gz 
+
+ENV LMSLIB_URL=${LMSLIB_HOST}/${LMSLIB_PKG}
 
 # ========================================================================================
 # ========================================================================================
@@ -207,6 +237,14 @@ RUN \
  \  
     apt-get -y update \
  && apt-get clean all \
+ \
+ # =========================================================================
+ #
+ #   download and install ldc-library
+ #
+ # =========================================================================
+ \
+ && if test "${LMSLIB_INST}" = "1"; then cd / ; wget "${LMSLIB_URL}"; tar -xvf "${LMSLIB_PKG}"; rm "${LMSLIB_PKG}"; fi \
  \
  # ========================================================================
  #
@@ -254,4 +292,3 @@ RUN \
 # =========================================================================
 
 ENTRYPOINT [ "/etc/lms/entrypoint.sh" ]
-#CMD [ "iw-helpers" ]
